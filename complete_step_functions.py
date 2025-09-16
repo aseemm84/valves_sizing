@@ -145,16 +145,127 @@ def step1_process_conditions():
                 help="Kinematic viscosity for Reynolds number correction"
             )
             
-        else:  # Gas/Vapor
-            # Similar implementation for gas fluids
-            # [Implementation details similar to liquid section]
-            st.info("Gas properties would be implemented here - similar to liquid section")
+        else:  # Gas/Vapor - FIXED IMPLEMENTATION
+            # Group gas fluids by category
+            gas_categories = {}
+            for fluid_name, data in gas_db.items():
+                category = data['category']
+                if category not in gas_categories:
+                    gas_categories[category] = []
+                gas_categories[category].append(fluid_name)
             
-            # Default values for demo
-            temperature = 25.0
-            molecular_weight = 28.97
-            specific_heat_ratio = 1.4
-            compressibility = 1.0
+            # Category selection for gas
+            selected_category = st.selectbox(
+                "Gas Category",
+                list(gas_categories.keys()) + ["Custom"],
+                help="Select gas category for easier navigation"
+            )
+            
+            if selected_category != "Custom":
+                gas_options = gas_categories[selected_category] + ["Custom"]
+            else:
+                gas_options = ["Custom"]
+            
+            fluid_name = st.selectbox(
+                "Gas Type",
+                gas_options,
+                help="Select specific gas for automatic property estimation"
+            )
+            
+            # Get gas properties and check for changes
+            current_selection = f"{fluid_type}_{fluid_name}_{st.session_state.unit_system}"
+            
+            if st.session_state.previous_fluid_selection != current_selection:
+                st.session_state.previous_fluid_selection = current_selection
+                if fluid_name != "Custom":
+                    st.session_state.fluid_properties_db = update_fluid_properties(
+                        fluid_type, fluid_name, st.session_state.unit_system
+                    )
+            
+            # Display gas description
+            if fluid_name != "Custom" and st.session_state.fluid_properties_db:
+                st.info(f"**{fluid_name}:** {st.session_state.fluid_properties_db.get('description', 'Standard industrial gas')}")
+            
+            # Temperature input with dynamic default for gas
+            temp_default = 25.0 if st.session_state.unit_system == 'metric' else 77.0
+            if st.session_state.fluid_properties_db:
+                temp_default = st.session_state.fluid_properties_db.get('typical_temp', temp_default)
+            
+            temperature = st.number_input(
+                f"Temperature ({'°C' if st.session_state.unit_system == 'metric' else '°F'})",
+                min_value=-200.0 if st.session_state.unit_system == 'metric' else -328.0,
+                max_value=800.0 if st.session_state.unit_system == 'metric' else 1472.0,
+                value=temp_default,
+                step=1.0,
+                help="Operating temperature of the gas"
+            )
+            
+            # Molecular weight with dynamic default
+            molecular_weight_default = 28.97  # Air default
+            if st.session_state.fluid_properties_db:
+                molecular_weight_default = st.session_state.fluid_properties_db.get('molecular_weight', molecular_weight_default)
+            
+            molecular_weight = st.number_input(
+                "Molecular Weight (kg/kmol)",
+                min_value=1.0,
+                max_value=200.0,
+                value=molecular_weight_default,
+                step=0.01,
+                format="%.2f",
+                help="Molecular weight for gas density calculations"
+            )
+            
+            # Specific heat ratio with dynamic default
+            k_ratio_default = 1.4  # Air default
+            if st.session_state.fluid_properties_db:
+                k_ratio_default = st.session_state.fluid_properties_db.get('k_ratio', k_ratio_default)
+            
+            specific_heat_ratio = st.number_input(
+                "Specific Heat Ratio (k = Cp/Cv)",
+                min_value=1.0,
+                max_value=2.0,
+                value=k_ratio_default,
+                step=0.01,
+                format="%.3f",
+                help="Ratio of specific heats for choked flow calculations"
+            )
+            
+            # Compressibility factor with dynamic default
+            z_factor_default = 1.0  # Ideal gas default
+            if st.session_state.fluid_properties_db:
+                z_factor_default = st.session_state.fluid_properties_db.get('z_factor', z_factor_default)
+            
+            compressibility = st.number_input(
+                "Compressibility Factor (Z)",
+                min_value=0.1,
+                max_value=2.0,
+                value=z_factor_default,
+                step=0.01,
+                format="%.3f",
+                help="Gas compressibility factor (1.0 = ideal gas)"
+            )
+            
+            # Gas density calculation and display
+            if st.session_state.show_advanced:
+                st.markdown("**Calculated Gas Properties:**")
+                
+                # Calculate gas density at operating conditions
+                # ρ = (P * MW) / (Z * R * T)
+                # R = 8314 J/(kmol·K) for metric, 1545 ft·lbf/(lbmol·°R) for imperial
+                
+                p_abs = 10.0  # Default pressure for density calc (will be updated from col2)
+                if st.session_state.unit_system == 'metric':
+                    temp_k = temperature + 273.15
+                    r_gas = 8314  # J/(kmol·K)
+                    p_pa = p_abs * 100000  # bar to Pa
+                    gas_density = (p_pa * molecular_weight) / (compressibility * r_gas * temp_k)
+                    st.metric("Gas Density (calc)", f"{gas_density:.2f} kg/m³")
+                else:
+                    temp_r = temperature + 459.67
+                    r_gas = 1545  # ft·lbf/(lbmol·°R)
+                    p_psf = p_abs * 144  # psi to psf
+                    gas_density = (p_psf * molecular_weight) / (compressibility * r_gas * temp_r)
+                    st.metric("Gas Density (calc)", f"{gas_density:.3f} lb/ft³")
     
     with col2:
         st.markdown("#### 🔧 Operating Conditions")
