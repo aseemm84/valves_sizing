@@ -1,17 +1,6 @@
-"""
-Enhanced Charts and Analysis Module
-Professional engineering charts for valve sizing analysis
-
-Features:
-- Valve characteristic curves with operating points
-- Cavitation analysis charts (ISA RP75.23)
-- Valve opening analysis at various flow conditions
-- Noise calculation analysis (IEC 60534-8-3)
-- Reynolds number analysis
-- Pressure drop analysis
-- Safety factor breakdown
-- Complete service conditions overview
-"""
+# Enhanced Charts and Analysis Module - Updated Integration Version
+# Professional engineering charts for valve sizing analysis with full app integration
+# Author: Aseem Mehrotra, Senior Instrumentation Construction Engineer, KBR Inc
 
 import plotly.graph_objects as go
 import plotly.express as px
@@ -20,9 +9,10 @@ import numpy as np
 import pandas as pd
 from typing import Dict, Any, List
 import streamlit as st
+import math
 
 class EnhancedChartsGenerator:
-    """Professional charts generator for valve sizing analysis"""
+    """Professional charts generator for valve sizing analysis with full integration"""
     
     def __init__(self):
         self.colors = {
@@ -38,7 +28,7 @@ class EnhancedChartsGenerator:
     
     def create_valve_characteristic_curve(self, valve_data: Dict[str, Any], 
                                         sizing_data: Dict[str, Any]) -> go.Figure:
-        """Create comprehensive valve characteristic curve"""
+        """Create comprehensive valve characteristic curve with operating point analysis"""
         
         characteristic = valve_data.get('flow_characteristic', 'Equal Percentage')
         max_cv = valve_data.get('max_cv', 100)
@@ -86,22 +76,22 @@ class EnhancedChartsGenerator:
         
         # Add operating range bands
         fig.add_hrect(y0=0, y1=max_cv*0.1, fillcolor=self.colors['light_red'], 
-                      opacity=0.2, annotation_text="Poor Control Range", 
-                      annotation_position="bottom right")
+                     opacity=0.2, annotation_text="Poor Control Range", 
+                     annotation_position="bottom right")
         
         fig.add_hrect(y0=max_cv*0.1, y1=max_cv*0.8, fillcolor=self.colors['light_green'], 
-                      opacity=0.2, annotation_text="Good Control Range", 
-                      annotation_position="top left")
+                     opacity=0.2, annotation_text="Good Control Range", 
+                     annotation_position="top left")
         
         fig.add_hrect(y0=max_cv*0.8, y1=max_cv, fillcolor=self.colors['light_red'], 
-                      opacity=0.2, annotation_text="Limited Control", 
-                      annotation_position="top right")
+                     opacity=0.2, annotation_text="Limited Control", 
+                     annotation_position="top right")
         
         # Add recommended range lines
         fig.add_hline(y=max_cv*0.2, line_dash="dash", line_color="orange",
-                      annotation_text="Min Recommended (20%)")
+                     annotation_text="Min Recommended (20%)")
         fig.add_hline(y=max_cv*0.8, line_dash="dash", line_color="orange",
-                      annotation_text="Max Recommended (80%)")
+                     annotation_text="Max Recommended (80%)")
         
         fig.update_layout(
             title='Valve Flow Characteristic Curve with Operating Analysis',
@@ -109,7 +99,10 @@ class EnhancedChartsGenerator:
             yaxis_title='Flow Coefficient (Cv)',
             height=500,
             showlegend=True,
-            hovermode='closest'
+            hovermode='closest',
+            plot_bgcolor='white',
+            xaxis=dict(gridcolor='lightgrey'),
+            yaxis=dict(gridcolor='lightgrey')
         )
         
         return fig
@@ -209,11 +202,12 @@ class EnhancedChartsGenerator:
         fig.update_layout(
             title='ISA RP75.23 Cavitation Analysis with Risk Assessment',
             height=700,
-            showlegend=True
+            showlegend=True,
+            plot_bgcolor='white'
         )
         
-        fig.update_xaxes(title_text="Sigma (σ) Value", row=1, col=1)
-        fig.update_yaxes(title_text="Cavitation Level", row=1, col=1)
+        fig.update_xaxes(title_text="Sigma (σ) Value", row=1, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="Cavitation Level", row=1, col=1, gridcolor='lightgrey')
         
         return fig
     
@@ -293,22 +287,25 @@ class EnhancedChartsGenerator:
         
         # Add control range bands
         fig.add_hrect(y0=0, y1=10, fillcolor=self.colors['light_red'], opacity=0.3,
-                      annotation_text="Poor Control", annotation_position="bottom left")
+                     annotation_text="Poor Control", annotation_position="bottom left")
         fig.add_hrect(y0=10, y1=20, fillcolor="yellow", opacity=0.3,
-                      annotation_text="Marginal Control", annotation_position="middle left")
+                     annotation_text="Marginal Control", annotation_position="middle left")
         fig.add_hrect(y0=20, y1=80, fillcolor=self.colors['light_green'], opacity=0.3,
-                      annotation_text="Good Control Range", annotation_position="top left")
+                     annotation_text="Good Control Range", annotation_position="top left")
         fig.add_hrect(y0=80, y1=90, fillcolor="yellow", opacity=0.3,
-                      annotation_text="Marginal Control", annotation_position="middle right")
+                     annotation_text="Marginal Control", annotation_position="middle right")
         fig.add_hrect(y0=90, y1=100, fillcolor=self.colors['light_red'], opacity=0.3,
-                      annotation_text="Poor Control", annotation_position="top right")
+                     annotation_text="Poor Control", annotation_position="top right")
         
         fig.update_layout(
             title='Valve Opening vs Flow Rate Analysis',
             xaxis_title=f'Flow Rate ({process_data.get("flow_units", "m³/h")})',
             yaxis_title='Valve Opening (%)',
             height=500,
-            showlegend=True
+            showlegend=True,
+            plot_bgcolor='white',
+            xaxis=dict(gridcolor='lightgrey'),
+            yaxis=dict(gridcolor='lightgrey')
         )
         
         return fig
@@ -326,7 +323,7 @@ class EnhancedChartsGenerator:
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=('Noise vs Distance', 'Frequency Analysis', 
-                          'Regulatory Compliance', 'Noise Sources'),
+                           'Regulatory Compliance', 'Noise Sources'),
             specs=[[{"secondary_y": False}, {"type": "bar"}],
                    [{"type": "bar"}, {"type": "pie"}]]
         )
@@ -343,9 +340,9 @@ class EnhancedChartsGenerator:
         
         # Add regulatory limits
         fig.add_hline(y=85, line_dash="dash", line_color="orange",
-                      annotation_text="OSHA Limit (85 dBA)", row=1, col=1)
+                     annotation_text="OSHA Limit (85 dBA)", row=1, col=1)
         fig.add_hline(y=80, line_dash="dash", line_color="red",
-                      annotation_text="Industrial Limit (80 dBA)", row=1, col=1)
+                     annotation_text="Industrial Limit (80 dBA)", row=1, col=1)
         
         # Top right: Frequency analysis (simplified)
         frequencies = ['125 Hz', '250 Hz', '500 Hz', '1 kHz', '2 kHz', '4 kHz', '8 kHz']
@@ -361,7 +358,7 @@ class EnhancedChartsGenerator:
         ), row=1, col=2)
         
         # Bottom left: Regulatory compliance
-        standards = ['OSHA\n(85 dBA)', 'EU Directive\n(87 dBA)', 'Industrial\n(80 dBA)']
+        standards = ['OSHA\\n(85 dBA)', 'EU Directive\\n(87 dBA)', 'Industrial\\n(80 dBA)']
         limits = [85, 87, 80]
         compliance = ['Pass' if spl_1m < limit else 'Fail' for limit in limits]
         colors_compliance = ['green' if c == 'Pass' else 'red' for c in compliance]
@@ -394,15 +391,16 @@ class EnhancedChartsGenerator:
         fig.update_layout(
             title='Comprehensive Noise Analysis (IEC 60534-8-3)',
             height=800,
-            showlegend=True
+            showlegend=True,
+            plot_bgcolor='white'
         )
         
-        fig.update_xaxes(title_text="Distance (m)", type="log", row=1, col=1)
-        fig.update_yaxes(title_text="Sound Pressure Level (dBA)", row=1, col=1)
-        fig.update_xaxes(title_text="Frequency", row=1, col=2)
-        fig.update_yaxes(title_text="SPL (dBA)", row=1, col=2)
-        fig.update_xaxes(title_text="Standard", row=2, col=1)
-        fig.update_yaxes(title_text="SPL (dBA)", row=2, col=1)
+        fig.update_xaxes(title_text="Distance (m)", type="log", row=1, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="Sound Pressure Level (dBA)", row=1, col=1, gridcolor='lightgrey')
+        fig.update_xaxes(title_text="Frequency", row=1, col=2, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="SPL (dBA)", row=1, col=2, gridcolor='lightgrey')
+        fig.update_xaxes(title_text="Standard", row=2, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="SPL (dBA)", row=2, col=1, gridcolor='lightgrey')
         
         return fig
     
@@ -417,7 +415,7 @@ class EnhancedChartsGenerator:
         fig = make_subplots(
             rows=2, cols=2,
             subplot_titles=('System Pressure Profile', 'Pressure Drop Distribution',
-                          'Valve Authority Analysis', 'Pressure Ratio Effects'),
+                           'Valve Authority Analysis', 'Pressure Ratio Effects'),
             specs=[[{"colspan": 2}, None],
                    [{"type": "pie"}, {"type": "bar"}]]
         )
@@ -482,7 +480,7 @@ class EnhancedChartsGenerator:
         ), row=2, col=1)
         
         # Bottom right: Pressure ratio effects
-        ratios = ['Pressure\nRatio', 'Valve\nAuthority', 'Recovery\nFactor']
+        ratios = ['Pressure\\nRatio', 'Valve\\nAuthority', 'Recovery\\nFactor']
         pressure_ratio = p2/p1 if p1 > 0 else 0
         valve_authority = delta_p/p1 if p1 > 0 else 0
         recovery_factor = 0.8  # Simplified
@@ -500,12 +498,13 @@ class EnhancedChartsGenerator:
         fig.update_layout(
             title='Comprehensive Pressure Drop Analysis',
             height=700,
-            showlegend=True
+            showlegend=True,
+            plot_bgcolor='white'
         )
         
-        fig.update_xaxes(title_text="System Position (%)", row=1, col=1)
-        fig.update_yaxes(title_text="Pressure (bar)", row=1, col=1)
-        fig.update_yaxes(title_text="Ratio Value", row=2, col=2)
+        fig.update_xaxes(title_text="System Position (%)", row=1, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="Pressure (bar)", row=1, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="Ratio Value", row=2, col=2, gridcolor='lightgrey')
         
         return fig
     
@@ -591,12 +590,13 @@ class EnhancedChartsGenerator:
         fig.update_layout(
             title='Reynolds Number Analysis and Correction Factors',
             height=600,
-            showlegend=True
+            showlegend=True,
+            plot_bgcolor='white'
         )
         
-        fig.update_xaxes(title_text="Reynolds Number", type="log", row=1, col=1)
-        fig.update_xaxes(title_text="Reynolds Number", type="log", row=2, col=1)
-        fig.update_yaxes(title_text="Fr Correction Factor", row=2, col=1)
+        fig.update_xaxes(title_text="Reynolds Number", type="log", row=1, col=1, gridcolor='lightgrey')
+        fig.update_xaxes(title_text="Reynolds Number", type="log", row=2, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="Fr Correction Factor", row=2, col=1, gridcolor='lightgrey')
         
         return fig
     
@@ -649,7 +649,7 @@ class EnhancedChartsGenerator:
         ), row=1, col=1)
         
         # Right: Comparison with industry standards
-        standards = ['ANSI/ISA\n(1.1-1.3)', 'API 14C\n(1.2-1.5)', 'IEC 61511\n(1.3-2.0)', f'Current\n({safety_factor:.1f})']
+        standards = ['ANSI/ISA\\n(1.1-1.3)', 'API 14C\\n(1.2-1.5)', 'IEC 61511\\n(1.3-2.0)', f'Current\\n({safety_factor:.1f})']
         standard_ranges = [[1.1, 1.3], [1.2, 1.5], [1.3, 2.0], [safety_factor, safety_factor]]
         
         # Add range bars
@@ -667,11 +667,12 @@ class EnhancedChartsGenerator:
         fig.update_layout(
             title='Safety Factor Analysis and Standards Comparison',
             height=500,
-            showlegend=False
+            showlegend=False,
+            plot_bgcolor='white'
         )
         
-        fig.update_yaxes(title_text="Safety Factor", row=1, col=1)
-        fig.update_yaxes(title_text="Safety Factor", row=1, col=2)
+        fig.update_yaxes(title_text="Safety Factor", row=1, col=1, gridcolor='lightgrey')
+        fig.update_yaxes(title_text="Safety Factor", row=1, col=2, gridcolor='lightgrey')
         
         return fig
     
