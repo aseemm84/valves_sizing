@@ -1,0 +1,42 @@
+# Enhanced Control Valve Sizing - Professional Edition
+# Core dependencies for industrial valve sizing application
+
+# Streamlit framework
+streamlit>=1.33.0
+streamlit-option-menu>=0.3.6
+
+# Scientific computing
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# Visualization
+plotly>=5.15.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# PDF and reporting
+fpdf2>=2.7.4
+reportlab>=4.0.0
+weasyprint>=59.0
+openpyxl>=3.1.0
+
+# Data validation
+pydantic>=2.0.0
+python-dateutil>=2.8.0
+
+# Unit conversion and engineering
+pint>=0.21.0
+
+# Optional enhancements
+streamlit-plotly-events>=0.0.6
+streamlit-aggrid>=0.3.4
+
+# Development and testing
+pytest>=7.4.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Documentation
+sphinx>=7.0.0
+sphinx-rtd-theme>=1.3.0
