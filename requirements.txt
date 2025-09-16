@@ -1,42 +1,92 @@
-# Enhanced Control Valve Sizing - Professional Edition
-# Core dependencies for industrial valve sizing application
+# Enhanced Control Valve Sizing Application - Professional Edition
+# Requirements file for all dependencies including new chart and datasheet features
 
-# Streamlit framework
-streamlit>=1.33.0
-streamlit-option-menu>=0.3.6
-
-# Scientific computing
-numpy>=1.24.0
+# Core Streamlit and web framework
+streamlit>=1.28.0
 pandas>=2.0.0
-scipy>=1.10.0
+numpy>=1.24.0
 
-# Visualization
+# Enhanced plotting and visualization
 plotly>=5.15.0
+plotly-express>=0.4.1
+
+# Data analysis and scientific computing
+scipy>=1.10.0
 matplotlib>=3.7.0
 seaborn>=0.12.0
 
-# PDF and reporting
-fpdf2>=2.7.4
+# Professional document generation
 reportlab>=4.0.0
-weasyprint>=59.0
 openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+Pillow>=10.0.0
 
-# Data validation
-pydantic>=2.0.0
-python-dateutil>=2.8.0
+# PDF generation and manipulation
+pypdf2>=3.0.0
+weasyprint>=59.0
 
-# Unit conversion and engineering
-pint>=0.21.0
+# Data export and import
+xlrd>=2.0.0
+python-docx>=0.8.11
 
-# Optional enhancements
-streamlit-plotly-events>=0.0.6
-streamlit-aggrid>=0.3.4
+# Scientific and engineering calculations
+sympy>=1.12
+CoolProp>=6.4.1
+
+# Enhanced data handling
+pyarrow>=13.0.0
+fastparquet>=2023.7.0
+
+# Statistical analysis
+statsmodels>=0.14.0
+
+# Unit conversion and engineering utilities
+pint>=0.22
+fluids>=1.0.23
 
 # Development and testing
 pytest>=7.4.0
-black>=23.0.0
+pytest-streamlit>=1.0.0
+black>=23.7.0
 flake8>=6.0.0
 
-# Documentation
-sphinx>=7.0.0
-sphinx-rtd-theme>=1.3.0
+# Optional dependencies for enhanced features
+# Install only if needed for specific functionality
+
+# For advanced fluid property calculations
+# refprop>=10.0  # NIST REFPROP (requires license)
+
+# For enhanced engineering calculations
+# cantera>=3.0.0  # Chemical kinetics and thermodynamics
+
+# For advanced optimization
+# scikit-learn>=1.3.0
+# tensorflow>=2.13.0  # For AI-enhanced predictions
+
+# For enhanced database connectivity
+# sqlalchemy>=2.0.0
+# psycopg2-binary>=2.9.0  # PostgreSQL
+# pymongo>=4.5.0  # MongoDB
+
+# For cloud deployment (optional)
+# streamlit-cloud>=1.0.0
+# boto3>=1.28.0  # AWS
+# azure-storage-blob>=12.17.0  # Azure
+
+# Note: Some packages may require additional system dependencies
+# For WeasyPrint on different systems:
+# - Ubuntu/Debian: sudo apt-get install build-essential python3-dev python3-pip python3-setuptools python3-wheel python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+# - CentOS/RHEL: sudo yum install gcc python3-devel python3-pip python3-setuptools python3-wheel python3-cffi cairo pango gdk-pixbuf2 libffi-devel
+# - Windows: Most packages install via pip without additional dependencies
+
+# Installation command:
+# pip install -r requirements.txt
+
+# For development environment:
+# pip install -r requirements.txt pytest black flake8
+
+# Optional: Create virtual environment first
+# python -m venv valve_sizing_env
+# source valve_sizing_env/bin/activate  # Linux/Mac
+# valve_sizing_env\Scripts\activate     # Windows
+# pip install -r requirements.txt
