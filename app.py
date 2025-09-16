@@ -540,7 +540,7 @@ def step1_process_conditions():
                     use_container_width=True):
             st.session_state.process_data = process_data
             st.session_state.current_step = 2
-            st.experimental_rerun()
+            st.rerun()
 
 def main():
     """Main application function"""
@@ -570,7 +570,7 @@ def main():
         
         if selected_step != st.session_state.current_step:
             st.session_state.current_step = selected_step
-            st.experimental_rerun()
+            st.rerun()
         
         st.markdown("---")
         
