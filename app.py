@@ -34,12 +34,434 @@ def initialize_session_state():
         'validation_warnings': [],
         'calculation_history': [],
         'unit_system': 'metric',
-        'show_advanced': False
+        'show_advanced': False,
+        'fluid_properties_db': {},
+        'previous_fluid_selection': None
     }
     
     for key, value in defaults.items():
         if key not in st.session_state:
             st.session_state[key] = value
+
+def get_comprehensive_fluid_database():
+    """Comprehensive fluid properties database"""
+    
+    liquid_fluids = {
+        # Hydrocarbons
+        'Water': {
+            'density': {'metric': 998.0, 'imperial': 62.4},  # kg/m³, lb/ft³
+            'vapor_pressure': {'metric': 0.032, 'imperial': 0.46},  # bar, psi
+            'viscosity': 1.0,  # cSt
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},  # °C, °F
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},  # bar, psi
+            'molecular_weight': 18.015,
+            'category': 'Water/Aqueous',
+            'description': 'Pure water at standard conditions'
+        },
+        'Light Crude Oil': {
+            'density': {'metric': 820.0, 'imperial': 51.2},
+            'vapor_pressure': {'metric': 0.15, 'imperial': 2.2},
+            'viscosity': 5.0,
+            'typical_temp': {'metric': 40.0, 'imperial': 104.0},
+            'critical_pressure': {'metric': 25.0, 'imperial': 363.0},
+            'molecular_weight': 120.0,
+            'category': 'Hydrocarbons',
+            'description': 'Light crude oil (API 35°)'
+        },
+        'Heavy Crude Oil': {
+            'density': {'metric': 950.0, 'imperial': 59.3},
+            'vapor_pressure': {'metric': 0.01, 'imperial': 0.15},
+            'viscosity': 200.0,
+            'typical_temp': {'metric': 80.0, 'imperial': 176.0},
+            'critical_pressure': {'metric': 15.0, 'imperial': 218.0},
+            'molecular_weight': 300.0,
+            'category': 'Hydrocarbons',
+            'description': 'Heavy crude oil (API 15°)'
+        },
+        'Gasoline': {
+            'density': {'metric': 740.0, 'imperial': 46.2},
+            'vapor_pressure': {'metric': 0.8, 'imperial': 11.6},
+            'viscosity': 0.6,
+            'typical_temp': {'metric': 20.0, 'imperial': 68.0},
+            'critical_pressure': {'metric': 28.0, 'imperial': 406.0},
+            'molecular_weight': 95.0,
+            'category': 'Refined Products',
+            'description': 'Motor gasoline (octane 87)'
+        },
+        'Diesel Fuel': {
+            'density': {'metric': 850.0, 'imperial': 53.1},
+            'vapor_pressure': {'metric': 0.05, 'imperial': 0.7},
+            'viscosity': 3.5,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 22.0, 'imperial': 319.0},
+            'molecular_weight': 170.0,
+            'category': 'Refined Products',
+            'description': 'No. 2 diesel fuel'
+        },
+        'Kerosene': {
+            'density': {'metric': 810.0, 'imperial': 50.6},
+            'vapor_pressure': {'metric': 0.1, 'imperial': 1.5},
+            'viscosity': 1.8,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 24.0, 'imperial': 348.0},
+            'molecular_weight': 140.0,
+            'category': 'Refined Products',
+            'description': 'Aviation kerosene (Jet A-1)'
+        },
+        
+        # Chemicals
+        'Methanol': {
+            'density': {'metric': 791.0, 'imperial': 49.4},
+            'vapor_pressure': {'metric': 0.17, 'imperial': 2.5},
+            'viscosity': 0.65,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 81.0, 'imperial': 1175.0},
+            'molecular_weight': 32.04,
+            'category': 'Alcohols',
+            'description': 'Methyl alcohol (CH3OH)'
+        },
+        'Ethanol': {
+            'density': {'metric': 789.0, 'imperial': 49.3},
+            'vapor_pressure': {'metric': 0.08, 'imperial': 1.2},
+            'viscosity': 1.2,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 63.0, 'imperial': 914.0},
+            'molecular_weight': 46.07,
+            'category': 'Alcohols',
+            'description': 'Ethyl alcohol (C2H5OH)'
+        },
+        'Benzene': {
+            'density': {'metric': 879.0, 'imperial': 54.9},
+            'vapor_pressure': {'metric': 0.13, 'imperial': 1.9},
+            'viscosity': 0.65,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 49.0, 'imperial': 711.0},
+            'molecular_weight': 78.11,
+            'category': 'Aromatics',
+            'description': 'Benzene (C6H6)'
+        },
+        'Toluene': {
+            'density': {'metric': 867.0, 'imperial': 54.1},
+            'vapor_pressure': {'metric': 0.04, 'imperial': 0.6},
+            'viscosity': 0.59,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 41.0, 'imperial': 595.0},
+            'molecular_weight': 92.14,
+            'category': 'Aromatics',
+            'description': 'Toluene (C7H8)'
+        },
+        'Acetone': {
+            'density': {'metric': 784.0, 'imperial': 49.0},
+            'vapor_pressure': {'metric': 0.31, 'imperial': 4.5},
+            'viscosity': 0.32,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 47.0, 'imperial': 682.0},
+            'molecular_weight': 58.08,
+            'category': 'Ketones',
+            'description': 'Acetone (C3H6O)'
+        },
+        
+        # Acids & Caustics
+        'Hydrochloric Acid (37%)': {
+            'density': {'metric': 1184.0, 'imperial': 73.9},
+            'vapor_pressure': {'metric': 0.05, 'imperial': 0.7},
+            'viscosity': 1.9,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 83.0, 'imperial': 1204.0},
+            'molecular_weight': 36.46,
+            'category': 'Acids',
+            'description': '37% HCl solution'
+        },
+        'Sulfuric Acid (98%)': {
+            'density': {'metric': 1841.0, 'imperial': 114.9},
+            'vapor_pressure': {'metric': 0.001, 'imperial': 0.015},
+            'viscosity': 25.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 64.0, 'imperial': 928.0},
+            'molecular_weight': 98.08,
+            'category': 'Acids',
+            'description': '98% H2SO4 solution'
+        },
+        'Sodium Hydroxide (50%)': {
+            'density': {'metric': 1525.0, 'imperial': 95.2},
+            'vapor_pressure': {'metric': 0.01, 'imperial': 0.15},
+            'viscosity': 8.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},
+            'molecular_weight': 40.0,
+            'category': 'Caustics',
+            'description': '50% NaOH solution'
+        },
+        
+        # Thermal Fluids
+        'Therminol VP-1': {
+            'density': {'metric': 1060.0, 'imperial': 66.2},
+            'vapor_pressure': {'metric': 0.001, 'imperial': 0.015},
+            'viscosity': 5.1,
+            'typical_temp': {'metric': 200.0, 'imperial': 392.0},
+            'critical_pressure': {'metric': 15.0, 'imperial': 218.0},
+            'molecular_weight': 230.0,
+            'category': 'Heat Transfer',
+            'description': 'Dow Therminol VP-1 heat transfer fluid'
+        },
+        'Dowtherm A': {
+            'density': {'metric': 1064.0, 'imperial': 66.4},
+            'vapor_pressure': {'metric': 0.5, 'imperial': 7.3},
+            'viscosity': 2.2,
+            'typical_temp': {'metric': 250.0, 'imperial': 482.0},
+            'critical_pressure': {'metric': 33.0, 'imperial': 479.0},
+            'molecular_weight': 166.0,
+            'category': 'Heat Transfer',
+            'description': 'Dow Dowtherm A heat transfer fluid'
+        },
+        
+        # Glycols
+        'Ethylene Glycol (50%)': {
+            'density': {'metric': 1070.0, 'imperial': 66.8},
+            'vapor_pressure': {'metric': 0.02, 'imperial': 0.3},
+            'viscosity': 4.8,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 77.0, 'imperial': 1117.0},
+            'molecular_weight': 62.07,
+            'category': 'Glycols',
+            'description': '50% ethylene glycol solution'
+        },
+        'Propylene Glycol (50%)': {
+            'density': {'metric': 1040.0, 'imperial': 64.9},
+            'vapor_pressure': {'metric': 0.01, 'imperial': 0.15},
+            'viscosity': 6.2,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 60.0, 'imperial': 870.0},
+            'molecular_weight': 76.09,
+            'category': 'Glycols',
+            'description': '50% propylene glycol solution'
+        }
+    }
+    
+    gas_fluids = {
+        # Common Gases
+        'Air': {
+            'molecular_weight': 28.97,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 37.7, 'imperial': 547.0},
+            'critical_temperature': 132.5,  # K
+            'category': 'Air & Inert',
+            'description': 'Dry air at standard conditions'
+        },
+        'Nitrogen': {
+            'molecular_weight': 28.01,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 34.0, 'imperial': 493.0},
+            'critical_temperature': 126.2,
+            'category': 'Air & Inert',
+            'description': 'Nitrogen (N2)'
+        },
+        'Oxygen': {
+            'molecular_weight': 32.0,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 50.4, 'imperial': 731.0},
+            'critical_temperature': 154.6,
+            'category': 'Air & Inert',
+            'description': 'Oxygen (O2)'
+        },
+        'Carbon Dioxide': {
+            'molecular_weight': 44.01,
+            'k_ratio': 1.28,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 73.8, 'imperial': 1071.0},
+            'critical_temperature': 304.1,
+            'category': 'Acid Gases',
+            'description': 'Carbon dioxide (CO2)'
+        },
+        'Carbon Monoxide': {
+            'molecular_weight': 28.01,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 35.0, 'imperial': 508.0},
+            'critical_temperature': 132.9,
+            'category': 'Toxic Gases',
+            'description': 'Carbon monoxide (CO)'
+        },
+        
+        # Natural Gas Components
+        'Natural Gas (Pipeline)': {
+            'molecular_weight': 17.5,
+            'k_ratio': 1.27,
+            'z_factor': 0.95,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 46.0, 'imperial': 667.0},
+            'critical_temperature': 190.6,
+            'category': 'Natural Gas',
+            'description': 'Typical pipeline natural gas'
+        },
+        'Methane': {
+            'molecular_weight': 16.04,
+            'k_ratio': 1.31,
+            'z_factor': 0.998,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 46.0, 'imperial': 667.0},
+            'critical_temperature': 190.6,
+            'category': 'Natural Gas',
+            'description': 'Pure methane (CH4)'
+        },
+        'Ethane': {
+            'molecular_weight': 30.07,
+            'k_ratio': 1.22,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 48.7, 'imperial': 706.0},
+            'critical_temperature': 305.3,
+            'category': 'Natural Gas',
+            'description': 'Ethane (C2H6)'
+        },
+        'Propane': {
+            'molecular_weight': 44.1,
+            'k_ratio': 1.15,
+            'z_factor': 0.98,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 42.5, 'imperial': 617.0},
+            'critical_temperature': 369.8,
+            'category': 'Natural Gas',
+            'description': 'Propane (C3H8)'
+        },
+        'Butane': {
+            'molecular_weight': 58.12,
+            'k_ratio': 1.11,
+            'z_factor': 0.97,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 38.0, 'imperial': 551.0},
+            'critical_temperature': 425.1,
+            'category': 'Natural Gas',
+            'description': 'n-Butane (C4H10)'
+        },
+        
+        # Steam & Water Vapor
+        'Steam (Saturated)': {
+            'molecular_weight': 18.015,
+            'k_ratio': 1.33,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 150.0, 'imperial': 302.0},
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},
+            'critical_temperature': 647.1,
+            'category': 'Steam',
+            'description': 'Saturated steam at typical conditions'
+        },
+        'Steam (Superheated)': {
+            'molecular_weight': 18.015,
+            'k_ratio': 1.3,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 200.0, 'imperial': 392.0},
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},
+            'critical_temperature': 647.1,
+            'category': 'Steam',
+            'description': 'Superheated steam'
+        },
+        
+        # Hydrogen & Light Gases
+        'Hydrogen': {
+            'molecular_weight': 2.016,
+            'k_ratio': 1.41,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 13.0, 'imperial': 189.0},
+            'critical_temperature': 33.2,
+            'category': 'Light Gases',
+            'description': 'Hydrogen (H2)'
+        },
+        'Helium': {
+            'molecular_weight': 4.003,
+            'k_ratio': 1.67,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 2.3, 'imperial': 33.0},
+            'critical_temperature': 5.2,
+            'category': 'Noble Gases',
+            'description': 'Helium (He)'
+        },
+        
+        # Acid Gases
+        'Hydrogen Sulfide': {
+            'molecular_weight': 34.08,
+            'k_ratio': 1.32,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 89.6, 'imperial': 1300.0},
+            'critical_temperature': 373.5,
+            'category': 'Acid Gases',
+            'description': 'Hydrogen sulfide (H2S) - Sour gas'
+        },
+        'Sulfur Dioxide': {
+            'molecular_weight': 64.07,
+            'k_ratio': 1.29,
+            'z_factor': 0.97,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 78.8, 'imperial': 1143.0},
+            'critical_temperature': 430.8,
+            'category': 'Acid Gases',
+            'description': 'Sulfur dioxide (SO2)'
+        },
+        
+        # Refrigerants
+        'Ammonia': {
+            'molecular_weight': 17.03,
+            'k_ratio': 1.31,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 113.3, 'imperial': 1644.0},
+            'critical_temperature': 405.7,
+            'category': 'Refrigerants',
+            'description': 'Ammonia (NH3)'
+        },
+        'R-134a': {
+            'molecular_weight': 102.03,
+            'k_ratio': 1.18,
+            'z_factor': 0.98,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 40.6, 'imperial': 589.0},
+            'critical_temperature': 374.2,
+            'category': 'Refrigerants',
+            'description': 'Tetrafluoroethane refrigerant'
+        }
+    }
+    
+    return liquid_fluids, gas_fluids
+
+def update_fluid_properties(fluid_type, fluid_name, unit_system):
+    """Update fluid properties based on selection"""
+    liquid_db, gas_db = get_comprehensive_fluid_database()
+    
+    if fluid_type == "Liquid" and fluid_name in liquid_db:
+        fluid_data = liquid_db[fluid_name]
+        return {
+            'density': fluid_data['density'][unit_system],
+            'vapor_pressure': fluid_data['vapor_pressure'][unit_system],
+            'viscosity': fluid_data['viscosity'],
+            'typical_temp': fluid_data['typical_temp'][unit_system],
+            'molecular_weight': fluid_data['molecular_weight'],
+            'description': fluid_data['description'],
+            'category': fluid_data['category']
+        }
+    elif fluid_type == "Gas/Vapor" and fluid_name in gas_db:
+        fluid_data = gas_db[fluid_name]
+        return {
+            'molecular_weight': fluid_data['molecular_weight'],
+            'k_ratio': fluid_data['k_ratio'],
+            'z_factor': fluid_data['z_factor'],
+            'typical_temp': fluid_data['typical_temp'][unit_system],
+            'critical_pressure': fluid_data['critical_pressure'][unit_system],
+            'description': fluid_data['description'],
+            'category': fluid_data['category']
+        }
+    
+    return None
 
 def display_header():
     """Display professional application header"""
@@ -107,15 +529,25 @@ def display_navigation():
                 """, unsafe_allow_html=True)
 
 def step1_process_conditions():
-    """Step 1: Process Conditions Input"""
+    """Step 1: Process Conditions Input - Enhanced with Dynamic Fluid Properties"""
     st.subheader("🔧 Step 1: Process Conditions")
     st.markdown("Enter accurate process data following industry best practices. All parameters are validated against ISA/IEC standards.")
+    
+    # Get fluid database
+    liquid_db, gas_db = get_comprehensive_fluid_database()
     
     # Unit system selection
     unit_options = ["Metric (SI)", "Imperial (US)"]
     unit_index = 0 if st.session_state.unit_system == 'metric' else 1
     selected_unit = st.radio("Unit System", unit_options, index=unit_index, horizontal=True)
     st.session_state.unit_system = selected_unit.lower().split()[0]
+    
+    # Advanced options toggle
+    st.session_state.show_advanced = st.checkbox(
+        "🔬 Show Advanced Options", 
+        value=st.session_state.show_advanced,
+        help="Show additional parameters for detailed analysis"
+    )
     
     col1, col2, col3 = st.columns([1, 1, 1])
     
@@ -128,16 +560,54 @@ def step1_process_conditions():
             help="Select the primary phase of the fluid at operating conditions"
         )
         
-        # Simplified fluid input with defaults
+        # Dynamic fluid selection with categories
         if fluid_type == "Liquid":
-            fluid_name = st.selectbox(
-                "Fluid Type",
-                ["Water", "Light Oil", "Heavy Oil", "Custom"],
-                help="Select fluid for automatic property estimation"
+            # Group fluids by category
+            categories = {}
+            for fluid_name, data in liquid_db.items():
+                category = data['category']
+                if category not in categories:
+                    categories[category] = []
+                categories[category].append(fluid_name)
+            
+            # Category selection
+            selected_category = st.selectbox(
+                "Fluid Category",
+                list(categories.keys()) + ["Custom"],
+                help="Select fluid category for easier navigation"
             )
             
-            # Temperature with proper defaults
+            if selected_category != "Custom":
+                fluid_options = categories[selected_category] + ["Custom"]
+            else:
+                fluid_options = ["Custom"]
+            
+            fluid_name = st.selectbox(
+                "Fluid Type",
+                fluid_options,
+                help="Select specific fluid for automatic property estimation"
+            )
+            
+            # Get fluid properties and check for changes
+            current_selection = f"{fluid_type}_{fluid_name}_{st.session_state.unit_system}"
+            
+            if st.session_state.previous_fluid_selection != current_selection:
+                st.session_state.previous_fluid_selection = current_selection
+                # Force rerun to update properties
+                if fluid_name != "Custom":
+                    st.session_state.fluid_properties_db = update_fluid_properties(
+                        fluid_type, fluid_name, st.session_state.unit_system
+                    )
+            
+            # Display fluid description
+            if fluid_name != "Custom" and st.session_state.fluid_properties_db:
+                st.info(f"**{fluid_name}:** {st.session_state.fluid_properties_db.get('description', 'Standard industrial fluid')}")
+            
+            # Temperature input with dynamic default
             temp_default = 25.0 if st.session_state.unit_system == 'metric' else 77.0
+            if st.session_state.fluid_properties_db:
+                temp_default = st.session_state.fluid_properties_db.get('typical_temp', temp_default)
+                
             temperature = st.number_input(
                 f"Temperature ({'°C' if st.session_state.unit_system == 'metric' else '°F'})",
                 min_value=-50.0 if st.session_state.unit_system == 'metric' else -58.0,
@@ -147,8 +617,11 @@ def step1_process_conditions():
                 help="Operating temperature of the fluid"
             )
             
-            # Density
+            # Density with dynamic default
             density_default = 998.0 if st.session_state.unit_system == 'metric' else 62.4
+            if st.session_state.fluid_properties_db:
+                density_default = st.session_state.fluid_properties_db.get('density', density_default)
+                
             density = st.number_input(
                 f"Density ({'kg/m³' if st.session_state.unit_system == 'metric' else 'lb/ft³'})",
                 min_value=0.1,
@@ -158,36 +631,101 @@ def step1_process_conditions():
                 help="Fluid density at operating temperature"
             )
             
-            # Vapor pressure
+            # Vapor pressure with dynamic default
+            vapor_pressure_default = 0.032 if st.session_state.unit_system == 'metric' else 0.46
+            if st.session_state.fluid_properties_db:
+                vapor_pressure_default = st.session_state.fluid_properties_db.get('vapor_pressure', vapor_pressure_default)
+            
             vapor_pressure = st.number_input(
                 f"Vapor Pressure ({'bar' if st.session_state.unit_system == 'metric' else 'psi'})",
                 min_value=0.0,
                 max_value=50.0 if st.session_state.unit_system == 'metric' else 725.0,
-                value=0.032 if st.session_state.unit_system == 'metric' else 0.46,
+                value=vapor_pressure_default,
                 step=0.001,
                 format="%.3f",
                 help="Vapor pressure at operating temperature"
             )
             
-            # Viscosity
+            # Viscosity with dynamic default
+            viscosity_default = 1.0
+            if st.session_state.fluid_properties_db:
+                viscosity_default = st.session_state.fluid_properties_db.get('viscosity', viscosity_default)
+            
             viscosity = st.number_input(
                 "Kinematic Viscosity (cSt)",
                 min_value=0.1,
                 max_value=10000.0,
-                value=1.0,
+                value=viscosity_default,
                 step=0.1,
                 help="Kinematic viscosity for Reynolds number correction"
             )
             
+            # Advanced liquid properties
+            if st.session_state.show_advanced:
+                st.markdown("**🔬 Advanced Properties**")
+                
+                bulk_modulus = st.number_input(
+                    f"Bulk Modulus ({'MPa' if st.session_state.unit_system == 'metric' else 'psi'})",
+                    min_value=1.0,
+                    max_value=10000.0,
+                    value=2200.0 if st.session_state.unit_system == 'metric' else 319000.0,
+                    help="Fluid bulk modulus for compressibility calculations"
+                )
+                
+                surface_tension = st.number_input(
+                    "Surface Tension (mN/m)",
+                    min_value=1.0,
+                    max_value=100.0,
+                    value=72.8,
+                    help="Surface tension at operating temperature"
+                )
+            
         else:  # Gas/Vapor
+            # Group gas fluids by category
+            categories = {}
+            for fluid_name, data in gas_db.items():
+                category = data['category']
+                if category not in categories:
+                    categories[category] = []
+                categories[category].append(fluid_name)
+            
+            # Category selection
+            selected_category = st.selectbox(
+                "Gas Category",
+                list(categories.keys()) + ["Custom"],
+                help="Select gas category for easier navigation"
+            )
+            
+            if selected_category != "Custom":
+                fluid_options = categories[selected_category] + ["Custom"]
+            else:
+                fluid_options = ["Custom"]
+            
             fluid_name = st.selectbox(
                 "Gas Type",
-                ["Air", "Natural Gas", "Nitrogen", "Custom"],
+                fluid_options,
                 help="Select gas for automatic property estimation"
             )
             
-            # Temperature
+            # Get fluid properties and check for changes
+            current_selection = f"{fluid_type}_{fluid_name}_{st.session_state.unit_system}"
+            
+            if st.session_state.previous_fluid_selection != current_selection:
+                st.session_state.previous_fluid_selection = current_selection
+                if fluid_name != "Custom":
+                    st.session_state.fluid_properties_db = update_fluid_properties(
+                        fluid_type, fluid_name, st.session_state.unit_system
+                    )
+            
+            # Display gas description
+            if fluid_name != "Custom" and st.session_state.fluid_properties_db:
+                st.info(f"**{fluid_name}:** {st.session_state.fluid_properties_db.get('description', 'Industrial gas')}")
+            
+            # Temperature with dynamic default
             temp_default = 25.0 if st.session_state.unit_system == 'metric' else 77.0
+            if st.session_state.fluid_properties_db:
+                temp_default = st.session_state.fluid_properties_db.get('typical_temp', temp_default)
+            
             temperature = st.number_input(
                 f"Temperature ({'°C' if st.session_state.unit_system == 'metric' else '°F'})",
                 min_value=-50.0 if st.session_state.unit_system == 'metric' else -58.0,
@@ -196,42 +734,79 @@ def step1_process_conditions():
                 step=1.0
             )
             
-            # Molecular weight
+            # Molecular weight with dynamic default
+            molecular_weight_default = 28.97
+            if st.session_state.fluid_properties_db:
+                molecular_weight_default = st.session_state.fluid_properties_db.get('molecular_weight', molecular_weight_default)
+            
             molecular_weight = st.number_input(
                 "Molecular Weight (kg/kmol)",
                 min_value=1.0,
                 max_value=200.0,
-                value=28.97,
+                value=molecular_weight_default,
                 step=0.01,
                 help="Molecular weight for gas calculations"
             )
             
-            # Specific heat ratio
+            # Specific heat ratio with dynamic default
+            k_ratio_default = 1.4
+            if st.session_state.fluid_properties_db:
+                k_ratio_default = st.session_state.fluid_properties_db.get('k_ratio', k_ratio_default)
+            
             specific_heat_ratio = st.number_input(
                 "Specific Heat Ratio (k = Cp/Cv)",
                 min_value=1.0,
                 max_value=2.0,
-                value=1.4,
+                value=k_ratio_default,
                 step=0.01,
                 help="Ratio of specific heats"
             )
             
-            # Compressibility
+            # Compressibility with dynamic default
+            z_factor_default = 1.0
+            if st.session_state.fluid_properties_db:
+                z_factor_default = st.session_state.fluid_properties_db.get('z_factor', z_factor_default)
+            
             compressibility = st.number_input(
                 "Compressibility Factor (Z)",
                 min_value=0.1,
                 max_value=2.0,
-                value=1.0,
+                value=z_factor_default,
                 step=0.01,
                 help="Gas compressibility factor (Z=1 for ideal gas)"
             )
+            
+            # Advanced gas properties
+            if st.session_state.show_advanced:
+                st.markdown("**🔬 Advanced Properties**")
+                
+                gas_viscosity = st.number_input(
+                    "Dynamic Viscosity (μP)",
+                    min_value=1.0,
+                    max_value=1000.0,
+                    value=18.0,
+                    help="Dynamic viscosity in micropoise"
+                )
+                
+                if st.session_state.fluid_properties_db:
+                    critical_pressure_default = st.session_state.fluid_properties_db.get('critical_pressure', 46.0)
+                else:
+                    critical_pressure_default = 46.0 if st.session_state.unit_system == 'metric' else 667.0
+                
+                critical_pressure = st.number_input(
+                    f"Critical Pressure ({'bar' if st.session_state.unit_system == 'metric' else 'psi'})",
+                    min_value=1.0,
+                    max_value=500.0,
+                    value=critical_pressure_default,
+                    help="Critical pressure for compressibility calculations"
+                )
     
     with col2:
         st.markdown("#### 🔧 Operating Conditions")
         
         pressure_units = "bar" if st.session_state.unit_system == 'metric' else "psi"
         
-        # Pressures with proper defaults
+        # Pressures with enhanced validation
         p1_default = 10.0 if st.session_state.unit_system == 'metric' else 145.0
         p1 = st.number_input(
             f"Inlet Pressure P1 ({pressure_units} abs)",
@@ -253,11 +828,18 @@ def step1_process_conditions():
         )
         
         delta_p = p1 - p2
-        st.info(f"**Pressure Drop (ΔP):** {delta_p:.2f} {pressure_units}")
+        pressure_ratio = p2 / p1 if p1 > 0 else 0
         
-        # Flow rate inputs
-        flow_units_liquid = ["m³/h", "L/s", "L/min"] if st.session_state.unit_system == 'metric' else ["GPM", "ft³/s", "bbl/h"]
-        flow_units_gas = ["Nm³/h", "Sm³/h", "kg/h"] if st.session_state.unit_system == 'metric' else ["SCFH", "ACFM", "lb/h"]
+        # Enhanced pressure display
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.metric("Pressure Drop (ΔP)", f"{delta_p:.2f} {pressure_units}")
+        with col_b:
+            st.metric("Pressure Ratio (P2/P1)", f"{pressure_ratio:.3f}")
+        
+        # Flow rate inputs with enhanced units
+        flow_units_liquid = ["m³/h", "L/s", "L/min", "gal/min"] if st.session_state.unit_system == 'metric' else ["GPM", "ft³/s", "bbl/h", "bbl/d"]
+        flow_units_gas = ["Nm³/h", "Sm³/h", "kg/h", "kmol/h"] if st.session_state.unit_system == 'metric' else ["SCFH", "ACFM", "lb/h", "MMSCFD"]
         
         flow_units = st.selectbox(
             "Flow Units",
@@ -292,46 +874,73 @@ def step1_process_conditions():
             help="Maximum required flow (typically 110-150% of normal)"
         )
         
-        # Pipeline data
+        # Pipeline data with enhanced options
+        pipe_sizes = ["1/2\"", "3/4\"", "1\"", "1.5\"", "2\"", "3\"", "4\"", "6\"", "8\"", 
+                     "10\"", "12\"", "14\"", "16\"", "18\"", "20\"", "24\"", "30\"", "36\"", "42\"", "48\""]
+        
         pipe_size = st.selectbox(
             "Nominal Pipe Size",
-            ["1/2\"", "3/4\"", "1\"", "1.5\"", "2\"", "3\"", "4\"", "6\"", "8\"", 
-             "10\"", "12\"", "14\"", "16\"", "18\"", "20\"", "24\"", "30\"", "36\""],
+            pipe_sizes,
             index=5,  # Default to 3"
             help="Nominal pipe size (affects piping geometry factor)"
         )
         
+        pipe_schedules = ["SCH 5", "SCH 10", "SCH 20", "SCH 30", "SCH 40", "SCH 60", "SCH 80", "SCH 100", "SCH 120", "SCH 140", "SCH 160", "SCH XXS"]
+        
         pipe_schedule = st.selectbox(
             "Pipe Schedule",
-            ["SCH 10", "SCH 20", "SCH 40", "SCH 80", "SCH 160", "SCH XXS"],
-            index=2,  # Default to SCH 40
+            pipe_schedules,
+            index=4,  # Default to SCH 40
             help="Pipe wall thickness schedule"
         )
+        
+        # Advanced piping options
+        if st.session_state.show_advanced:
+            st.markdown("**🔬 Advanced Piping**")
+            
+            reducers_upstream = st.checkbox("Reducer Upstream", help="Concentric/eccentric reducer upstream of valve")
+            reducers_downstream = st.checkbox("Reducer Downstream", help="Concentric/eccentric reducer downstream of valve")
+            
+            if reducers_upstream or reducers_downstream:
+                piping_configuration = st.selectbox(
+                    "Piping Configuration",
+                    ["Standard", "Reducer both sides", "Expander both sides", "Mixed configuration"],
+                    help="Special piping configuration affects Fp factor"
+                )
     
     with col3:
         st.markdown("#### 🏭 Service Classification")
         
+        service_types = [
+            "Clean Service", "Dirty Service", "Corrosive Service", 
+            "High Temperature", "Cryogenic", "Erosive Service",
+            "Flashing Service", "Cavitating Service", "Two-Phase Flow"
+        ]
+        
         service_type = st.selectbox(
             "Service Type",
-            ["Clean Service", "Dirty Service", "Corrosive Service", 
-             "High Temperature", "Cryogenic", "Erosive Service"],
+            service_types,
             help="Service classification affects material selection and safety factors"
         )
         
+        criticalities = ["Non-Critical", "Important", "Critical", "Safety Critical", "Emergency Shutdown"]
+        
         criticality = st.selectbox(
             "Service Criticality",
-            ["Non-Critical", "Important", "Critical", "Safety Critical"],
+            criticalities,
             help="Process criticality level affects safety factors and material requirements"
         )
         
+        control_modes = ["Modulating", "On-Off", "Emergency Shutdown", "Throttling", "Pressure Relief"]
+        
         control_mode = st.selectbox(
             "Control Mode",
-            ["Modulating", "On-Off", "Emergency Shutdown"],
+            control_modes,
             help="Type of control operation required"
         )
         
-        # Environmental factors
-        st.markdown("**Environmental Conditions**")
+        # Enhanced environmental factors
+        st.markdown("**🌡️ Environmental Conditions**")
         
         h2s_present = st.checkbox(
             "H2S Present (Sour Service)",
@@ -348,29 +957,78 @@ def step1_process_conditions():
                 format="%.3f",
                 help="H2S partial pressure for NACE compliance check"
             )
+            
+            if st.session_state.show_advanced:
+                h2s_concentration = st.number_input(
+                    "H2S Concentration (mol%)",
+                    min_value=0.0,
+                    max_value=100.0,
+                    value=1.0,
+                    step=0.1,
+                    help="H2S mole percentage in gas phase"
+                )
         else:
             h2s_partial_pressure = 0.0
+            h2s_concentration = 0.0
         
         fire_safe_required = st.checkbox(
             "Fire-Safe Required",
             help="Fire-safe certification required (API 607/ISO 10497)"
         )
         
+        fugitive_emission_options = [
+            "Standard", "Low Emission (TA-Luft)", "ISO 15848-1 Class A", 
+            "ISO 15848-1 Class B", "ISO 15848-1 Class C", "EPA Method 21"
+        ]
+        
         fugitive_emissions = st.selectbox(
             "Fugitive Emission Class",
-            ["Standard", "Low Emission (TA-Luft)", "ISO 15848-1 Class A", 
-             "ISO 15848-1 Class B", "ISO 15848-1 Class C"],
+            fugitive_emission_options,
             help="Fugitive emission requirements"
         )
+        
+        # Advanced environmental options
+        if st.session_state.show_advanced:
+            st.markdown("**🔬 Advanced Environmental**")
+            
+            chloride_content = st.number_input(
+                "Chloride Content (ppm)",
+                min_value=0,
+                max_value=100000,
+                value=0,
+                help="Chloride concentration for material selection"
+            )
+            
+            ph_value = st.number_input(
+                "pH Value",
+                min_value=0.0,
+                max_value=14.0,
+                value=7.0,
+                step=0.1,
+                help="pH value for corrosion assessment"
+            )
+            
+            operating_altitude = st.number_input(
+                "Operating Altitude (m above sea level)",
+                min_value=0,
+                max_value=5000,
+                value=0,
+                help="Altitude affects atmospheric pressure corrections"
+            )
+    
+    # Enhanced validation section
+    st.markdown("#### ✅ Input Validation & Analysis")
     
     # Compile process data
     process_data = {
         'fluid_type': fluid_type,
         'fluid_name': fluid_name,
+        'selected_category': selected_category if fluid_name != "Custom" else "Custom",
         'temperature': temperature,
         'p1': p1,
         'p2': p2,
         'delta_p': delta_p,
+        'pressure_ratio': pressure_ratio,
         'normal_flow': normal_flow,
         'min_flow': min_flow,
         'max_flow': max_flow,
@@ -384,7 +1042,8 @@ def step1_process_conditions():
         'h2s_partial_pressure': h2s_partial_pressure,
         'fire_safe_required': fire_safe_required,
         'fugitive_emissions': fugitive_emissions,
-        'unit_system': st.session_state.unit_system
+        'unit_system': st.session_state.unit_system,
+        'show_advanced': st.session_state.show_advanced
     }
     
     # Add fluid-specific properties
@@ -394,15 +1053,30 @@ def step1_process_conditions():
             'vapor_pressure': vapor_pressure,
             'viscosity': viscosity
         })
+        if st.session_state.show_advanced:
+            process_data.update({
+                'bulk_modulus': bulk_modulus,
+                'surface_tension': surface_tension
+            })
     else:
         process_data.update({
             'molecular_weight': molecular_weight,
             'specific_heat_ratio': specific_heat_ratio,
             'compressibility': compressibility
         })
+        if st.session_state.show_advanced:
+            process_data.update({
+                'gas_viscosity': gas_viscosity,
+                'critical_pressure': critical_pressure,
+                'h2s_concentration': h2s_concentration,
+                'chloride_content': chloride_content,
+                'ph_value': ph_value,
+                'operating_altitude': operating_altitude
+            })
     
-    # Basic validation
+    # Enhanced validation
     validation_errors = []
+    validation_warnings = []
     
     # Basic checks
     if p1 <= p2:
@@ -417,44 +1091,106 @@ def step1_process_conditions():
     if max_flow <= normal_flow:
         validation_errors.append("Maximum flow must be greater than normal flow")
     
-    if validation_errors:
-        st.error("⚠️ **Validation Errors:**")
-        for error in validation_errors:
-            st.error(f"• {error}")
-    else:
-        st.success("✅ **All inputs validated successfully**")
+    # Advanced validation
+    if pressure_ratio < 0.1:
+        validation_warnings.append("Very high pressure drop - check for choked flow conditions")
+    
+    if fluid_type == "Liquid":
+        if vapor_pressure > p2:
+            validation_warnings.append("Outlet pressure below vapor pressure - flashing may occur")
         
-        # Calculate basic safety factor
+        if delta_p > (0.8 * (p1 - vapor_pressure)):
+            validation_warnings.append("High pressure drop may cause cavitation")
+    
+    if fluid_type == "Gas/Vapor":
+        critical_pressure_ratio = (2.0 / (specific_heat_ratio + 1.0)) ** (specific_heat_ratio / (specific_heat_ratio - 1.0))
+        if pressure_ratio < critical_pressure_ratio:
+            validation_warnings.append("Critical pressure ratio reached - sonic flow conditions")
+    
+    # Display validation results
+    col_val1, col_val2 = st.columns(2)
+    
+    with col_val1:
+        if validation_errors:
+            st.error("⚠️ **Validation Errors:**")
+            for error in validation_errors:
+                st.error(f"• {error}")
+        else:
+            st.success("✅ **All inputs validated successfully**")
+    
+    with col_val2:
+        if validation_warnings:
+            st.warning("⚠️ **Engineering Warnings:**")
+            for warning in validation_warnings:
+                st.warning(f"• {warning}")
+        else:
+            st.info("ℹ️ **No engineering concerns identified**")
+    
+    if not validation_errors:
+        # Calculate enhanced safety factor
         safety_factors = {
             'Non-Critical': 1.1,
             'Important': 1.2,
             'Critical': 1.3,
-            'Safety Critical': 1.5
+            'Safety Critical': 1.5,
+            'Emergency Shutdown': 1.8
         }
         safety_factor = safety_factors.get(criticality, 1.2)
+        
+        # Service type multipliers
+        service_multipliers = {
+            'Erosive Service': 1.2,
+            'Cavitating Service': 1.3,
+            'Two-Phase Flow': 1.4,
+            'Flashing Service': 1.3
+        }
+        safety_factor *= service_multipliers.get(service_type, 1.0)
+        
         if h2s_present:
             safety_factor *= 1.1
         
-        process_data['safety_factor'] = safety_factor
-        st.info(f"📊 **Recommended Safety Factor:** {safety_factor:.1f} (Based on {criticality} service)")
+        process_data['safety_factor'] = round(safety_factor, 1)
         
-        # Display process summary
-        with st.expander("📋 Process Data Summary", expanded=False):
-            col1, col2 = st.columns(2)
+        # Display enhanced summary
+        col_sum1, col_sum2 = st.columns(2)
+        
+        with col_sum1:
+            st.info(f"📊 **Recommended Safety Factor:** {safety_factor:.1f}")
+            st.info(f"🎯 **Pressure Drop Severity:** {(delta_p/p1*100):.1f}% of P1")
+            
+        with col_sum2:
+            st.info(f"⚡ **Flow Turndown Required:** {(max_flow/min_flow):.1f}:1")
+            st.info(f"🌡️ **Service Classification:** {criticality} {service_type}")
+        
+        # Display detailed process summary
+        with st.expander("📋 Enhanced Process Data Summary", expanded=False):
+            col1, col2, col3 = st.columns(3)
             with col1:
                 st.markdown(f"""
-                **Fluid:** {fluid_name} ({fluid_type})  
-                **Temperature:** {temperature:.1f} {'°C' if st.session_state.unit_system == 'metric' else '°F'}  
-                **Pressure Drop:** {delta_p:.2f} {pressure_units}  
-                **Flow Range:** {min_flow:.1f} - {max_flow:.1f} {flow_units}
+                **Fluid Properties:**
+                - Type: {fluid_name} ({fluid_type})
+                - Category: {process_data.get('selected_category', 'N/A')}
+                - Temperature: {temperature:.1f} {'°C' if st.session_state.unit_system == 'metric' else '°F'}
+                - Pressure: {p1:.1f} → {p2:.1f} {pressure_units}
                 """)
             with col2:
                 st.markdown(f"""
-                **Service:** {service_type}  
-                **Criticality:** {criticality}  
-                **Control:** {control_mode}  
-                **Safety Factor:** {safety_factor:.1f}
+                **Operating Conditions:**
+                - Flow Range: {min_flow:.1f} - {max_flow:.1f} {flow_units}
+                - Pressure Drop: {delta_p:.2f} {pressure_units} ({pressure_ratio:.3f} ratio)
+                - Pipeline: {pipe_size} {pipe_schedule}
                 """)
+            with col3:
+                st.markdown(f"""
+                **Service Parameters:**
+                - Classification: {service_type}
+                - Criticality: {criticality}
+                - Control Mode: {control_mode}
+                - Safety Factor: {safety_factor:.1f}
+                """)
+            
+            if st.session_state.show_advanced:
+                st.markdown("**Advanced Parameters Included:** Environmental conditions, enhanced fluid properties, and piping configurations have been captured for detailed analysis.")
     
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -466,6 +1202,9 @@ def step1_process_conditions():
             st.session_state.process_data = process_data
             st.session_state.current_step = 2
             st.rerun()
+
+# Keep all other step functions the same as in the previous version
+# (step2_valve_selection through step7_final_report remain unchanged)
 
 def step2_valve_selection():
     """Step 2: Valve Selection"""
@@ -1742,7 +2481,8 @@ def step7_final_report():
         summary_data.append(["Parameter", "Value", "Units", "Standard/Method"])
         
         # Process conditions
-        summary_data.append(["Fluid Type", process_data.get('fluid_type', ''), "", "User Input"])
+        summary_data.append(["Fluid Type", process_data.get('fluid_name', ''), "", "User Selection"])
+        summary_data.append(["Fluid Category", process_data.get('selected_category', ''), "", "Database Classification"])
         summary_data.append(["Temperature", f"{process_data.get('temperature', 0):.1f}", "°C", "Operating Conditions"])
         summary_data.append(["Inlet Pressure", f"{process_data.get('p1', 0):.1f}", "bar", "Operating Conditions"])
         summary_data.append(["Outlet Pressure", f"{process_data.get('p2', 0):.1f}", "bar", "Operating Conditions"])
@@ -1775,69 +2515,146 @@ def step7_final_report():
     
     with col1:
         if st.button("📄 Generate Text Report", use_container_width=True):
-            # Generate a simple text report
-            report_content = f"""# Control Valve Sizing Report
+            # Generate a comprehensive text report
+            report_content = f"""# Enhanced Control Valve Sizing Report - Professional Edition
 
 **Project:** {project_name}
 **Tag:** {tag_number}
 **Engineer:** {engineer_name}
-**Date:** {pd.Timestamp.now().strftime('%Y-%m-%d')}
+**Date:** {pd.Timestamp.now().strftime('%Y-%m-%d %H:%M')}
 
-## Summary
+## Executive Summary
 - Required Cv: {cv_required:.2f}
 - Valve Size: {valve_size}
 - Valve Type: {valve_type}
 - Opening at Normal Flow: {opening_percent:.1f}%
 
 ## Process Conditions
-- Fluid: {process_data.get('fluid_name', 'N/A')}
+- Fluid: {process_data.get('fluid_name', 'N/A')} ({process_data.get('selected_category', 'N/A')})
 - Temperature: {process_data.get('temperature', 0):.1f}°C
 - Pressure Drop: {process_data.get('delta_p', 0):.2f} bar
 - Flow Rate: {process_data.get('normal_flow', 0):.1f} {process_data.get('flow_units', '')}
 
-## Standards Applied
-- ISA 75.01/IEC 60534-2-1 (Sizing)
-- ISA RP75.23 (Cavitation)
-- IEC 60534-8-3 (Noise)
-- ASME B16.34 (Materials)
+## Enhanced Fluid Properties
+{f"- Dynamic Properties: Loaded from comprehensive database" if st.session_state.fluid_properties_db else "- Standard Properties: User-defined"}
+- Service Classification: {process_data.get('criticality', 'Standard')} {process_data.get('service_type', '')}
+- Environmental Factors: {"H2S Service" if process_data.get('h2s_present', False) else "Sweet Service"}
 
-**Note:** This is a simplified report. For critical applications, detailed analysis with manufacturer software is recommended.
+## Analysis Results
+### Sizing (ISA 75.01/IEC 60534-2-1)
+- Basic Cv Required: {sizing_results.get('cv_required', 0):.2f}
+- Safety Factor Applied: {process_data.get('safety_factor', 1.2):.1f}
+- Final Cv Required: {cv_required:.2f}
+
+{"### Cavitation Analysis (ISA RP75.23)" if cavitation_analysis else ""}
+{f"- Service Sigma: {cavitation_analysis.get('sigma_service', 0):.1f}" if cavitation_analysis else ""}
+{f"- Risk Level: {cavitation_analysis.get('risk_level', 'N/A')}" if cavitation_analysis else ""}
+
+{"### Noise Prediction (IEC 60534-8-3)" if noise_analysis else ""}
+{f"- Sound Pressure Level: {noise_analysis.get('spl_at_distance', 0):.1f} dBA" if noise_analysis else ""}
+{f"- Assessment: {noise_analysis.get('assessment_level', 'N/A')}" if noise_analysis else ""}
+
+## Standards Applied
+- ISA 75.01/IEC 60534-2-1 (Sizing Calculations)
+- ISA RP75.23 (Cavitation Analysis)
+- IEC 60534-8-3 (Noise Prediction)
+- ASME B16.34 (Material Standards)
+- NACE MR0175 (Sour Service Materials)
+- API 6D (Pipeline Valve Requirements)
+
+## Advanced Features Utilized
+{f"- Comprehensive Fluid Database: {len(st.session_state.fluid_properties_db)} properties loaded" if st.session_state.fluid_properties_db else ""}
+- Advanced Options: {"Enabled" if process_data.get('show_advanced', False) else "Standard"}
+- Dynamic Property Updates: Automatic fluid property loading based on selection
+
+## Professional Disclaimer
+This report provides professional valve sizing calculations based on industry standards.
+For critical applications:
+- Validate results against manufacturer data
+- Review calculations with licensed Professional Engineer  
+- Verify material selections against actual service conditions
+- Cross-check with vendor sizing software
+
+**Author:** {engineer_name}
+**Application:** Enhanced Control Valve Sizing - Professional Edition
+**Database:** Comprehensive fluid properties with {len(get_comprehensive_fluid_database()[0]) + len(get_comprehensive_fluid_database()[1])} fluids
 """
             
             st.download_button(
-                label="📥 Download Text Report",
+                label="📥 Download Enhanced Report",
                 data=report_content,
-                file_name=f"{tag_number}_Valve_Sizing_Report.txt",
+                file_name=f"{tag_number}_Enhanced_Valve_Sizing_Report.txt",
                 mime="text/plain",
                 use_container_width=True
             )
-            st.success("✅ Text report ready for download!")
+            st.success("✅ Enhanced professional report ready for download!")
     
     with col2:
-        if st.button("📊 Generate CSV Data", use_container_width=True):
-            # Generate CSV with all data
-            csv_data = pd.DataFrame([{
-                'Parameter': row[0],
-                'Value': row[1], 
-                'Units': row[2],
-                'Standard': row[3]
-            } for row in summary_data[1:]])
+        if st.button("📊 Generate Enhanced CSV Data", use_container_width=True):
+            # Generate enhanced CSV with all data including fluid properties
+            enhanced_data = []
             
+            # Add all summary data
+            for row in summary_data[1:]:
+                enhanced_data.append({
+                    'Category': 'Process Data',
+                    'Parameter': row[0],
+                    'Value': row[1],
+                    'Units': row[2],
+                    'Standard': row[3],
+                    'Notes': ''
+                })
+            
+            # Add fluid properties if available
+            if st.session_state.fluid_properties_db:
+                for prop, value in st.session_state.fluid_properties_db.items():
+                    if prop not in ['description', 'category']:
+                        enhanced_data.append({
+                            'Category': 'Fluid Properties (Database)',
+                            'Parameter': prop.replace('_', ' ').title(),
+                            'Value': str(value),
+                            'Units': '',
+                            'Standard': 'Database Lookup',
+                            'Notes': f"From {st.session_state.fluid_properties_db.get('category', 'Unknown')} database"
+                        })
+            
+            # Add advanced parameters if enabled
+            if process_data.get('show_advanced', False):
+                advanced_params = ['bulk_modulus', 'surface_tension', 'gas_viscosity', 'critical_pressure', 
+                                 'h2s_concentration', 'chloride_content', 'ph_value', 'operating_altitude']
+                for param in advanced_params:
+                    if param in process_data:
+                        enhanced_data.append({
+                            'Category': 'Advanced Parameters',
+                            'Parameter': param.replace('_', ' ').title(),
+                            'Value': str(process_data[param]),
+                            'Units': '',
+                            'Standard': 'Advanced Analysis',
+                            'Notes': 'Enhanced calculation parameter'
+                        })
+            
+            csv_data = pd.DataFrame(enhanced_data)
             csv_string = csv_data.to_csv(index=False)
             
             st.download_button(
-                label="📥 Download CSV Data",
+                label="📥 Download Enhanced CSV Data",
                 data=csv_string,
-                file_name=f"{tag_number}_Valve_Sizing_Data.csv",
+                file_name=f"{tag_number}_Enhanced_Valve_Sizing_Data.csv",
                 mime="text/csv",
                 use_container_width=True
             )
-            st.success("✅ CSV data ready for download!")
+            st.success("✅ Enhanced CSV data with fluid database ready for download!")
     
-    # Professional disclaimer
+    # Enhanced professional disclaimer
     st.markdown("#### ⚠️ Professional Disclaimer")
-    st.warning("""
-    **IMPORTANT NOTICE:** This report provides professional valve sizing calculations based on industry standards (ISA 75.01, IEC 60534-2-1, ISA RP75.23, IEC 60534-8-3, ASME B16.34, NACE MR0175).
+    st.warning(f"""
+    **ENHANCED PROFESSIONAL VALVE SIZING TOOL** 
+    
+    This application provides professional valve sizing calculations with enhanced features:
+    - **Comprehensive Fluid Database:** {len(get_comprehensive_fluid_database()[0]) + len(get_comprehensive_fluid_database()[1])} industrial fluids
+    - **Dynamic Property Updates:** Automatic fluid property loading
+    - **Advanced Analysis Options:** Extended parameter sets for detailed analysis
+    - **Standards Compliance:** ISA 75.01, IEC 60534-2-1, ISA RP75.23, IEC 60534-8-3, ASME B16.34, NACE MR0175
     
     **For critical applications:**
     - Validate results against manufacturer data
@@ -1845,7 +2662,13 @@ def step7_final_report():
     - Verify material selections against actual service conditions
     - Cross-check with vendor sizing software
     
-    **Author:** Aseem Mehrotra, Senior Instrumentation Construction Engineer, KBR Inc
+    **Enhanced Features Utilized:**
+    - Advanced Options: {"✅ Enabled" if process_data.get('show_advanced', False) else "⚪ Standard"}
+    - Fluid Database: {"✅ Active" if st.session_state.fluid_properties_db else "⚪ Manual Entry"}
+    - Dynamic Updates: {"✅ Active" if st.session_state.previous_fluid_selection else "⚪ Static"}
+    
+    **Author:** {engineer_name}
+    **Tool Version:** Enhanced Professional Edition v2.0
     """)
     
     # Navigation buttons
@@ -1856,7 +2679,7 @@ def step7_final_report():
             st.rerun()
     
     with col2:
-        if st.button("🔄 **Start New Analysis**", 
+        if st.button("🔄 **Start New Enhanced Analysis**", 
                     type="secondary", 
                     use_container_width=True):
             # Clear all session state
@@ -1867,13 +2690,13 @@ def step7_final_report():
             st.rerun()
 
 def main():
-    """Main application function"""
+    """Main application function with enhanced features"""
     initialize_session_state()
     display_header()
     
-    # Sidebar navigation
+    # Enhanced sidebar navigation
     with st.sidebar:
-        st.header("🧭 Navigation")
+        st.header("🧭 Enhanced Navigation")
         
         steps = [
             "Process Conditions",
@@ -1898,7 +2721,7 @@ def main():
         
         st.markdown("---")
         
-        # Progress summary
+        # Enhanced progress summary
         st.markdown("#### 📊 Progress")
         progress_items = [
             ("Process Data", bool(st.session_state.get('process_data'))),
@@ -1913,8 +2736,39 @@ def main():
             status = "✅" if completed else "⭕"
             st.text(f"{status} {item}")
         
+        # Enhanced status indicators
+        st.markdown("#### 🔬 Enhanced Features Status")
+        
+        # Fluid database status
+        if st.session_state.fluid_properties_db:
+            st.success(f"🗃️ Fluid Database: Active")
+            st.caption(f"Category: {st.session_state.fluid_properties_db.get('category', 'Unknown')}")
+        else:
+            st.info("🗃️ Fluid Database: Manual Entry")
+        
+        # Advanced options status
+        if st.session_state.show_advanced:
+            st.success("🔬 Advanced Options: Enabled")
+        else:
+            st.info("🔬 Advanced Options: Standard")
+        
+        # Dynamic updates status
+        if st.session_state.previous_fluid_selection:
+            st.success("⚡ Dynamic Updates: Active")
+        else:
+            st.info("⚡ Dynamic Updates: Ready")
+        
+        st.markdown("---")
+        
+        # Database information
+        liquid_db, gas_db = get_comprehensive_fluid_database()
+        st.markdown("#### 📊 Database Stats")
+        st.info(f"**Liquid Fluids:** {len(liquid_db)}")
+        st.info(f"**Gas/Vapor Fluids:** {len(gas_db)}")
+        st.info(f"**Total Categories:** {len(set([data['category'] for data in {**liquid_db, **gas_db}.values()]))}")
+        
         # Help
-        st.markdown("#### ❓ Help")
+        st.markdown("#### ❓ Enhanced Help")
         st.markdown("""
         **Standards Implemented:**
         - ISA 75.01 / IEC 60534-2-1
@@ -1923,6 +2777,12 @@ def main():
         - ASME B16.34 (Materials)
         - NACE MR0175 (Sour Service)
         - API 6D (Pipeline Valves)
+        
+        **Enhanced Features:**
+        - 🗃️ Comprehensive fluid database
+        - ⚡ Dynamic property updates
+        - 🔬 Advanced analysis options
+        - 📊 Professional reporting
         
         **Important:** Validate calculations 
         against manufacturer software for 
