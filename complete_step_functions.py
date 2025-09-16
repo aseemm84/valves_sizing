@@ -1400,42 +1400,388 @@ def get_comprehensive_fluid_database():
     """Simplified fluid database for demo"""
     
     liquid_fluids = {
+        # Hydrocarbons
         'Water': {
-            'density': {'metric': 998.0, 'imperial': 62.4},
-            'vapor_pressure': {'metric': 0.032, 'imperial': 0.46},
-            'viscosity': 1.0,
-            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'density': {'metric': 998.0, 'imperial': 62.4},  # kg/m³, lb/ft³
+            'vapor_pressure': {'metric': 0.032, 'imperial': 0.46},  # bar, psi
+            'viscosity': 1.0,  # cSt
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},  # °C, °F
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},  # bar, psi
             'molecular_weight': 18.015,
             'category': 'Water/Aqueous',
             'description': 'Pure water at standard conditions'
         },
-        'Light Oil': {
-            'density': {'metric': 850.0, 'imperial': 53.1},
-            'vapor_pressure': {'metric': 0.1, 'imperial': 1.5},
+        'Light Crude Oil': {
+            'density': {'metric': 820.0, 'imperial': 51.2},
+            'vapor_pressure': {'metric': 0.15, 'imperial': 2.2},
             'viscosity': 5.0,
             'typical_temp': {'metric': 40.0, 'imperial': 104.0},
-            'molecular_weight': 150.0,
+            'critical_pressure': {'metric': 25.0, 'imperial': 363.0},
+            'molecular_weight': 120.0,
             'category': 'Hydrocarbons',
-            'description': 'Light hydrocarbon oil'
+            'description': 'Light crude oil (API 35°)'
+        },
+        'Heavy Crude Oil': {
+            'density': {'metric': 950.0, 'imperial': 59.3},
+            'vapor_pressure': {'metric': 0.01, 'imperial': 0.15},
+            'viscosity': 200.0,
+            'typical_temp': {'metric': 80.0, 'imperial': 176.0},
+            'critical_pressure': {'metric': 15.0, 'imperial': 218.0},
+            'molecular_weight': 300.0,
+            'category': 'Hydrocarbons',
+            'description': 'Heavy crude oil (API 15°)'
+        },
+        'Gasoline': {
+            'density': {'metric': 740.0, 'imperial': 46.2},
+            'vapor_pressure': {'metric': 0.8, 'imperial': 11.6},
+            'viscosity': 0.6,
+            'typical_temp': {'metric': 20.0, 'imperial': 68.0},
+            'critical_pressure': {'metric': 28.0, 'imperial': 406.0},
+            'molecular_weight': 95.0,
+            'category': 'Refined Products',
+            'description': 'Motor gasoline (octane 87)'
+        },
+        'Diesel Fuel': {
+            'density': {'metric': 850.0, 'imperial': 53.1},
+            'vapor_pressure': {'metric': 0.05, 'imperial': 0.7},
+            'viscosity': 3.5,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 22.0, 'imperial': 319.0},
+            'molecular_weight': 170.0,
+            'category': 'Refined Products',
+            'description': 'No. 2 diesel fuel'
+        },
+        'Kerosene': {
+            'density': {'metric': 810.0, 'imperial': 50.6},
+            'vapor_pressure': {'metric': 0.1, 'imperial': 1.5},
+            'viscosity': 1.8,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 24.0, 'imperial': 348.0},
+            'molecular_weight': 140.0,
+            'category': 'Refined Products',
+            'description': 'Aviation kerosene (Jet A-1)'
+        },
+        
+        # Chemicals
+        'Methanol': {
+            'density': {'metric': 791.0, 'imperial': 49.4},
+            'vapor_pressure': {'metric': 0.17, 'imperial': 2.5},
+            'viscosity': 0.65,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 81.0, 'imperial': 1175.0},
+            'molecular_weight': 32.04,
+            'category': 'Alcohols',
+            'description': 'Methyl alcohol (CH3OH)'
+        },
+        'Ethanol': {
+            'density': {'metric': 789.0, 'imperial': 49.3},
+            'vapor_pressure': {'metric': 0.08, 'imperial': 1.2},
+            'viscosity': 1.2,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 63.0, 'imperial': 914.0},
+            'molecular_weight': 46.07,
+            'category': 'Alcohols',
+            'description': 'Ethyl alcohol (C2H5OH)'
+        },
+        'Benzene': {
+            'density': {'metric': 879.0, 'imperial': 54.9},
+            'vapor_pressure': {'metric': 0.13, 'imperial': 1.9},
+            'viscosity': 0.65,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 49.0, 'imperial': 711.0},
+            'molecular_weight': 78.11,
+            'category': 'Aromatics',
+            'description': 'Benzene (C6H6)'
+        },
+        'Toluene': {
+            'density': {'metric': 867.0, 'imperial': 54.1},
+            'vapor_pressure': {'metric': 0.04, 'imperial': 0.6},
+            'viscosity': 0.59,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 41.0, 'imperial': 595.0},
+            'molecular_weight': 92.14,
+            'category': 'Aromatics',
+            'description': 'Toluene (C7H8)'
+        },
+        'Acetone': {
+            'density': {'metric': 784.0, 'imperial': 49.0},
+            'vapor_pressure': {'metric': 0.31, 'imperial': 4.5},
+            'viscosity': 0.32,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 47.0, 'imperial': 682.0},
+            'molecular_weight': 58.08,
+            'category': 'Ketones',
+            'description': 'Acetone (C3H6O)'
+        },
+        
+        # Acids & Caustics
+        'Hydrochloric Acid (37%)': {
+            'density': {'metric': 1184.0, 'imperial': 73.9},
+            'vapor_pressure': {'metric': 0.05, 'imperial': 0.7},
+            'viscosity': 1.9,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 83.0, 'imperial': 1204.0},
+            'molecular_weight': 36.46,
+            'category': 'Acids',
+            'description': '37% HCl solution'
+        },
+        'Sulfuric Acid (98%)': {
+            'density': {'metric': 1841.0, 'imperial': 114.9},
+            'vapor_pressure': {'metric': 0.001, 'imperial': 0.015},
+            'viscosity': 25.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 64.0, 'imperial': 928.0},
+            'molecular_weight': 98.08,
+            'category': 'Acids',
+            'description': '98% H2SO4 solution'
+        },
+        'Sodium Hydroxide (50%)': {
+            'density': {'metric': 1525.0, 'imperial': 95.2},
+            'vapor_pressure': {'metric': 0.01, 'imperial': 0.15},
+            'viscosity': 8.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},
+            'molecular_weight': 40.0,
+            'category': 'Caustics',
+            'description': '50% NaOH solution'
+        },
+        
+        # Thermal Fluids
+        'Therminol VP-1': {
+            'density': {'metric': 1060.0, 'imperial': 66.2},
+            'vapor_pressure': {'metric': 0.001, 'imperial': 0.015},
+            'viscosity': 5.1,
+            'typical_temp': {'metric': 200.0, 'imperial': 392.0},
+            'critical_pressure': {'metric': 15.0, 'imperial': 218.0},
+            'molecular_weight': 230.0,
+            'category': 'Heat Transfer',
+            'description': 'Dow Therminol VP-1 heat transfer fluid'
+        },
+        'Dowtherm A': {
+            'density': {'metric': 1064.0, 'imperial': 66.4},
+            'vapor_pressure': {'metric': 0.5, 'imperial': 7.3},
+            'viscosity': 2.2,
+            'typical_temp': {'metric': 250.0, 'imperial': 482.0},
+            'critical_pressure': {'metric': 33.0, 'imperial': 479.0},
+            'molecular_weight': 166.0,
+            'category': 'Heat Transfer',
+            'description': 'Dow Dowtherm A heat transfer fluid'
+        },
+        
+        # Glycols
+        'Ethylene Glycol (50%)': {
+            'density': {'metric': 1070.0, 'imperial': 66.8},
+            'vapor_pressure': {'metric': 0.02, 'imperial': 0.3},
+            'viscosity': 4.8,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 77.0, 'imperial': 1117.0},
+            'molecular_weight': 62.07,
+            'category': 'Glycols',
+            'description': '50% ethylene glycol solution'
+        },
+        'Propylene Glycol (50%)': {
+            'density': {'metric': 1040.0, 'imperial': 64.9},
+            'vapor_pressure': {'metric': 0.01, 'imperial': 0.15},
+            'viscosity': 6.2,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 60.0, 'imperial': 870.0},
+            'molecular_weight': 76.09,
+            'category': 'Glycols',
+            'description': '50% propylene glycol solution'
         }
     }
     
     gas_fluids = {
+        # Common Gases
         'Air': {
             'molecular_weight': 28.97,
             'k_ratio': 1.4,
             'z_factor': 1.0,
             'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 37.7, 'imperial': 547.0},
+            'critical_temperature': 132.5,  # K
             'category': 'Air & Inert',
             'description': 'Dry air at standard conditions'
         },
-        'Natural Gas': {
+        'Nitrogen': {
+            'molecular_weight': 28.01,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 34.0, 'imperial': 493.0},
+            'critical_temperature': 126.2,
+            'category': 'Air & Inert',
+            'description': 'Nitrogen (N2)'
+        },
+        'Oxygen': {
+            'molecular_weight': 32.0,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 50.4, 'imperial': 731.0},
+            'critical_temperature': 154.6,
+            'category': 'Air & Inert',
+            'description': 'Oxygen (O2)'
+        },
+        'Carbon Dioxide': {
+            'molecular_weight': 44.01,
+            'k_ratio': 1.28,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 73.8, 'imperial': 1071.0},
+            'critical_temperature': 304.1,
+            'category': 'Acid Gases',
+            'description': 'Carbon dioxide (CO2)'
+        },
+        'Carbon Monoxide': {
+            'molecular_weight': 28.01,
+            'k_ratio': 1.4,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 35.0, 'imperial': 508.0},
+            'critical_temperature': 132.9,
+            'category': 'Toxic Gases',
+            'description': 'Carbon monoxide (CO)'
+        },
+        
+        # Natural Gas Components
+        'Natural Gas (Pipeline)': {
             'molecular_weight': 17.5,
             'k_ratio': 1.27,
             'z_factor': 0.95,
             'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 46.0, 'imperial': 667.0},
+            'critical_temperature': 190.6,
             'category': 'Natural Gas',
-            'description': 'Pipeline natural gas'
+            'description': 'Typical pipeline natural gas'
+        },
+        'Methane': {
+            'molecular_weight': 16.04,
+            'k_ratio': 1.31,
+            'z_factor': 0.998,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 46.0, 'imperial': 667.0},
+            'critical_temperature': 190.6,
+            'category': 'Natural Gas',
+            'description': 'Pure methane (CH4)'
+        },
+        'Ethane': {
+            'molecular_weight': 30.07,
+            'k_ratio': 1.22,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 48.7, 'imperial': 706.0},
+            'critical_temperature': 305.3,
+            'category': 'Natural Gas',
+            'description': 'Ethane (C2H6)'
+        },
+        'Propane': {
+            'molecular_weight': 44.1,
+            'k_ratio': 1.15,
+            'z_factor': 0.98,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 42.5, 'imperial': 617.0},
+            'critical_temperature': 369.8,
+            'category': 'Natural Gas',
+            'description': 'Propane (C3H8)'
+        },
+        'Butane': {
+            'molecular_weight': 58.12,
+            'k_ratio': 1.11,
+            'z_factor': 0.97,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 38.0, 'imperial': 551.0},
+            'critical_temperature': 425.1,
+            'category': 'Natural Gas',
+            'description': 'n-Butane (C4H10)'
+        },
+        
+        # Steam & Water Vapor
+        'Steam (Saturated)': {
+            'molecular_weight': 18.015,
+            'k_ratio': 1.33,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 150.0, 'imperial': 302.0},
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},
+            'critical_temperature': 647.1,
+            'category': 'Steam',
+            'description': 'Saturated steam at typical conditions'
+        },
+        'Steam (Superheated)': {
+            'molecular_weight': 18.015,
+            'k_ratio': 1.3,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 200.0, 'imperial': 392.0},
+            'critical_pressure': {'metric': 221.2, 'imperial': 3208.0},
+            'critical_temperature': 647.1,
+            'category': 'Steam',
+            'description': 'Superheated steam'
+        },
+        
+        # Hydrogen & Light Gases
+        'Hydrogen': {
+            'molecular_weight': 2.016,
+            'k_ratio': 1.41,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 13.0, 'imperial': 189.0},
+            'critical_temperature': 33.2,
+            'category': 'Light Gases',
+            'description': 'Hydrogen (H2)'
+        },
+        'Helium': {
+            'molecular_weight': 4.003,
+            'k_ratio': 1.67,
+            'z_factor': 1.0,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 2.3, 'imperial': 33.0},
+            'critical_temperature': 5.2,
+            'category': 'Noble Gases',
+            'description': 'Helium (He)'
+        },
+        
+        # Acid Gases
+        'Hydrogen Sulfide': {
+            'molecular_weight': 34.08,
+            'k_ratio': 1.32,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 89.6, 'imperial': 1300.0},
+            'critical_temperature': 373.5,
+            'category': 'Acid Gases',
+            'description': 'Hydrogen sulfide (H2S) - Sour gas'
+        },
+        'Sulfur Dioxide': {
+            'molecular_weight': 64.07,
+            'k_ratio': 1.29,
+            'z_factor': 0.97,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 78.8, 'imperial': 1143.0},
+            'critical_temperature': 430.8,
+            'category': 'Acid Gases',
+            'description': 'Sulfur dioxide (SO2)'
+        },
+        
+        # Refrigerants
+        'Ammonia': {
+            'molecular_weight': 17.03,
+            'k_ratio': 1.31,
+            'z_factor': 0.99,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 113.3, 'imperial': 1644.0},
+            'critical_temperature': 405.7,
+            'category': 'Refrigerants',
+            'description': 'Ammonia (NH3)'
+        },
+        'R-134a': {
+            'molecular_weight': 102.03,
+            'k_ratio': 1.18,
+            'z_factor': 0.98,
+            'typical_temp': {'metric': 25.0, 'imperial': 77.0},
+            'critical_pressure': {'metric': 40.6, 'imperial': 589.0},
+            'critical_temperature': 374.2,
+            'category': 'Refrigerants',
+            'description': 'Tetrafluoroethane refrigerant'
         }
     }
     
